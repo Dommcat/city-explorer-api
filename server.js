@@ -3,6 +3,7 @@ console.log('Yasss our first srver!');
 
 //*****REQUIRES */
 const express = require('express');
+const axios = require('axios');
 require('dotenv').config();
 const cors = require('cors');
 
@@ -11,6 +12,7 @@ const cors = require('cors');
 // *** FOR LAB DON'T FORGET TO REQUIRE YOUR STARTER JSON FILE ***
 let data = require('./Data/weather.json');
 const { response } = require('express');
+const { default: axios } = require('axios');
 
 //*******Once express is in need to use it - per express docs
 //*****App ==== server 
@@ -19,7 +21,6 @@ const app = express();
 //****MIDDLEWARE */
 // *** cors is middleware - security guard that allows us to share resources across the internet **
 app.use(cors());
-
 
 //****Define port*/
 const PORT = process.env.PORT || 3002;
@@ -36,7 +37,7 @@ app.get('/', (request, response) => {
 // *** Callback function - 2 parameters: request, response (req,res)
 
 app.get('/', (request, response) => {
-  response.status(200).send('Welcome to my server');
+  response.status(200).send('Welcome to my MuthA FlipN server');
 });
 
 app.get('/hello', (request, response) => {
@@ -49,57 +50,35 @@ app.get('/hello', (request, response) => {
 });
 
 
-//****WEATHER */
 
-app.get('/weather', (req, res, next) => {
-  let lat = req.query.lat;
-  let lon = req.query.lon;
-  let searchQuery = req.query.searchQuery;
-  res.status(200).send("Hello");
-});
+//*********DEFINE WEATHER ENDPOINT WITH THE FOLLOWING QUERIES -lat, lon searchQuery */
+//TODO /weather?lat=value&lon=value&searchQuery=value
 
-
-app.get('/hello', (request, response) => {
-  console.log(request.query);
-
-  let firstName = request.query.firstName;
-  let lastName = request.query.lastName;
-
-  response.status(200).send(`Hello ${firstName} ${lastName}! Welcome to my server!`);
-});
-
-
-//*************DATA GROOM ********/
-
-app.get('Data/weather.json', (request, response, next) => {
+app.get('/weather', (request, response, next) => {
   try {
-    let forcast = request.query.date;
-
-    let dataToGroom = data.find(forcast => forcast.date === forcast);
-    let dataToSend = new forcast(dataToGroom);
-
-    response.status(200).send(dataToSend);
+    let lat = request.query.lat;
+    let lon = request.query.lon;
+    let cityName = request.query.searchQuery;
+    let weatherbiturl = `https://api.weatherbit.io/v2.0/forecast/daily?city=${cityName}&key=${process.env.WEATHERAPIKEY}`
+    let weatherstuff = axios.get(weatherbiturl)
+console.log(weatherstuff)
+    // let city = data.find(city => city.city_name.toLowerCase() === cityName.toLowerCase());
+    let weatherData = city.data.map(dayObj => new Forcast(dayObj));
+    response.status(200).send(weatherData);
 
   } catch (error) {
-    next(error);
+    next(error)
   }
-
 });
-
-
 
 // **** CLASS TO GROOM BULKY DATA ****
 
 class Forcast {
   constructor(forcastObj) {
-    this.date = forcastObj.date;
-    this.description = forcastObj.description;
+    this.date = forcastObj.datetime;
+    this.description = forcastObj.weather.description;
   }
 }
-
-
-
-
 
 
 
@@ -115,8 +94,23 @@ app.use((error, request, response, next) => {
 
 
 
-
-
 // ***** SERVER START ******
 app.listen(PORT, () => console.log(`we are running on port:${PORT}`));
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
