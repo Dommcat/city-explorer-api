@@ -110,6 +110,7 @@ class Movie {
   constructor(movieObj) {
     this.title = movieObj.title;
     this.description = movieObj.overview;
+    this.imageurl = 'https://image.tmdb.org/t/p/original'+movieObj.poster_path;
   }
 }
 
